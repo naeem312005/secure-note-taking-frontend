@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import Pagination from '../components/Pagination';
 import Modal from '../components/Modal';
+import { Plus, Search, FileText, Clock, Edit3, Trash2, Calendar } from 'lucide-react';
 
 const NotesListPage = () => {
   const [notes, setNotes] = useState([]);
@@ -13,6 +14,7 @@ const NotesListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [deleteModal, setDeleteModal] = useState({ open: false, noteId: null, noteTitle: '' });
   const [deleting, setDeleting] = useState(false);
 
@@ -50,91 +52,140 @@ const NotesListPage = () => {
     }
   };
 
+  const filteredNotes = notes.filter((n) =>
+    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Notes</h1>
-          <p className="text-sm text-gray-500">
-            All your private notes, retrieved using the compound index <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">{"{ userId: 1, createdAt: -1 }"}</code>
-          </p>
+    <div className="min-h-screen bg-zinc-50/50 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <div className="text-[11px] font-mono font-medium text-zinc-400 uppercase mb-1">
+              Vault Storage
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900">
+              My Private Notes
+            </h1>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              Encrypted notes indexed for high-concurrency retrieval and instant sorting.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Link
+              to="/notes/create"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors shrink-0 w-full sm:w-auto justify-center"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create Note</span>
+            </Link>
+          </div>
         </div>
 
-        <Link
-          to="/notes/create"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-        >
-          + Create New Note
-        </Link>
-      </div>
+        {/* Search Bar */}
+        <div className="mb-6 relative">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Filter notes by title or content..."
+            className="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200/80 rounded-xl text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all shadow-2xs"
+          />
+        </div>
 
-      {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <LoadingSpinner text="Fetching your notes..." />
-        ) : notes.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              title="No notes found"
-              description="You have not created any notes yet. Click the button below to add your first note."
-              actionText="Create Note"
-              actionLink="/notes/create"
-            />
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-gray-100">
-              {notes.map((note) => (
-                <div key={note._id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div className="max-w-4xl">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1">{note.title}</h2>
-                    <p className="text-sm text-gray-600 whitespace-pre-line line-clamp-3">{note.content}</p>
-                    <div className="text-xs text-gray-400 mt-3 flex items-center space-x-4">
-                      <span>Created: {new Date(note.createdAt).toLocaleString()}</span>
-                      {note.updatedAt !== note.createdAt && (
-                        <span>Updated: {new Date(note.updatedAt).toLocaleString()}</span>
-                      )}
+        <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-2xs overflow-hidden">
+          {loading ? (
+            <LoadingSpinner text="Decrypting notes..." />
+          ) : filteredNotes.length === 0 ? (
+            <div className="p-8">
+              <EmptyState
+                title={searchQuery ? 'No matching notes' : 'Vault is empty'}
+                description={
+                  searchQuery
+                    ? `No notes match "${searchQuery}". Try a different keyword.`
+                    : 'Start writing your first secure note to organize your thoughts.'
+                }
+                actionText={searchQuery ? 'Clear Filter' : 'Create Note'}
+                actionLink={searchQuery ? null : '/notes/create'}
+                onAction={searchQuery ? () => setSearchQuery('') : null}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="divide-y divide-zinc-100">
+                {filteredNotes.map((note) => (
+                  <div
+                    key={note._id}
+                    className="p-6 hover:bg-zinc-50/70 transition-colors flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group"
+                  >
+                    <div className="max-w-4xl">
+                      <h2 className="text-base font-bold text-zinc-900 tracking-tight mb-1.5">
+                        {note.title}
+                      </h2>
+                      <p className="text-sm text-zinc-600 whitespace-pre-line line-clamp-3 leading-relaxed">
+                        {note.content}
+                      </p>
+                      <div className="text-xs font-mono text-zinc-400 mt-3 flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(note.createdAt).toLocaleDateString()}
+                        </span>
+                        <span>&bull;</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                      <Link
+                        to={`/notes/edit/${note._id}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors shadow-2xs"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-zinc-400" />
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => setDeleteModal({ open: true, noteId: note._id, noteTitle: note.title })}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-rose-600 bg-white border border-rose-200/70 rounded-lg hover:bg-rose-50 transition-colors shadow-2xs"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <Link
-                      to={`/notes/edit/${note._id}`}
-                      className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => setDeleteModal({ open: true, noteId: note._id, noteTitle: note.title })}
-                      className="px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+              <Pagination
+                pagination={pagination}
+                onPageChange={(newPage) => setCurrentPage(newPage)}
+              />
+            </>
+          )}
+        </div>
 
-            <Pagination
-              pagination={pagination}
-              onPageChange={(newPage) => setCurrentPage(newPage)}
-            />
-          </>
-        )}
-      </div>
-
-      <Modal
-        isOpen={deleteModal.open}
-        title="Delete Note"
-        confirmText="Confirm Delete"
-        confirmVariant="danger"
-        loading={deleting}
-        onClose={() => setDeleteModal({ open: false, noteId: null, noteTitle: '' })}
-        onConfirm={handleDeleteConfirm}
-      >
-        <p>Are you sure you want to delete <strong>"{deleteModal.noteTitle}"</strong>?</p>
-      </Modal>
+        <Modal
+          isOpen={deleteModal.open}
+          title="Delete Note"
+          confirmText="Delete"
+          confirmVariant="danger"
+          loading={deleting}
+          onClose={() => setDeleteModal({ open: false, noteId: null, noteTitle: '' })}
+          onConfirm={handleDeleteConfirm}
+        >
+          <p className="text-sm text-zinc-700">
+            Are you sure you want to permanently delete <strong>"{deleteModal.noteTitle}"</strong>?
+          </p>
+        </Modal>
+      </main>
     </div>
   );
 };

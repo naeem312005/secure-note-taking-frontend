@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Pagination = ({ pagination, onPageChange }) => {
   if (!pagination || pagination.totalPages <= 1) return null;
@@ -8,31 +9,33 @@ const Pagination = ({ pagination, onPageChange }) => {
   const endItem = Math.min(currentPage * perPage, total);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6 mt-4 rounded-b-lg">
-      <div className="text-sm text-gray-700 mb-2 sm:mb-0">
-        Showing <span className="font-medium">{startItem}</span> to{' '}
-        <span className="font-medium">{endItem}</span> of{' '}
-        <span className="font-medium">{total}</span> results
+    <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 bg-white border-t border-zinc-100 text-xs text-zinc-500">
+      <div className="mb-2 sm:mb-0">
+        Showing <span className="font-semibold text-zinc-900 font-mono">{startItem}</span> to{' '}
+        <span className="font-semibold text-zinc-900 font-mono">{endItem}</span> of{' '}
+        <span className="font-semibold text-zinc-900 font-mono">{total}</span> records
       </div>
       <div className="flex items-center space-x-2">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1 px-3 py-1.5 font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
         >
-          Previous
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span>Previous</span>
         </button>
 
-        <span className="text-sm text-gray-600 px-2">
-          Page {currentPage} of {totalPages}
+        <span className="font-mono text-xs px-2 text-zinc-400">
+          {currentPage} / {totalPages}
         </span>
 
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1 px-3 py-1.5 font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs"
         >
-          Next
+          <span>Next</span>
+          <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
