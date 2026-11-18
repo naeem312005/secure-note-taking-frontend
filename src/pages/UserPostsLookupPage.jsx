@@ -4,6 +4,7 @@ import api from '../api/axios';
 import Alert from '../components/Alert';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AdminSubNav from '../components/AdminSubNav';
+import { Database, Code2, ArrowLeft, Calendar, FileText, CheckCircle2, User, Hash } from 'lucide-react';
 
 const UserPostsLookupPage = () => {
   const { id } = useParams();
@@ -29,20 +30,23 @@ const UserPostsLookupPage = () => {
     fetchUserPosts();
   }, [id]);
 
-  const pipelineCode = `// SCENARIO 2: User Posts using $lookup (Single Pipeline)
-// Constraint: Start with User, join Posts via $lookup, no populate()
-User.aggregate([
-  {
-    $match: { _id: new mongoose.Types.ObjectId(userId) }
-  },
+  const pipelineCode = `// Single-Pipeline Join using MongoDB $lookup
+// Starting Collection: db.users.aggregate([...])
+[
+  // 1. $match: Filter primary user by ObjectId
+  { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+
+  // 2. $lookup: Relational join with 'posts' collection
   {
     $lookup: {
-      from: 'posts',           // Joined collection
-      localField: '_id',       // User._id
-      foreignField: 'userId',  // Post.userId
+      from: 'posts',
+      localField: '_id',
+      foreignField: 'userId',
       as: 'posts'
     }
   },
+
+  // 3. $project: Format user details and author post array (exclude password)
   {
     $project: {
       _id: 1,
@@ -65,129 +69,138 @@ User.aggregate([
       }
     }
   }
-]);`;
+]`;
 
   return (
-    <div>
+    <div className="min-h-screen bg-zinc-50/50">
       <AdminSubNav />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-blue-100 text-blue-800">
-                Scenario 2
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                $lookup Join
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">User Posts via $lookup</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Retrieves the user and their posts through a single MongoDB aggregation pipeline with a <code className="text-xs font-mono font-bold">$lookup</code> stage.
-            </p>
-          </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to="/admin/users"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Users Directory</span>
+          </Link>
 
-          <div className="flex items-center space-x-2 shrink-0">
-            <button
-              onClick={() => setShowCode(!showCode)}
-              className="px-3.5 py-1.5 border border-gray-300 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
-            >
-              {showCode ? 'Hide Pipeline' : 'View Pipeline Code'}
-            </button>
-            <Link
-              to="/admin/users"
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl"
-            >
-              &larr; Users
-            </Link>
-          </div>
+          <button
+            onClick={() => setShowCode(!showCode)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 rounded-lg text-xs font-medium shadow-2xs transition-all"
+          >
+            <Code2 className="w-3.5 h-3.5 text-zinc-400" />
+            <span>{showCode ? 'Close Spec' : 'Inspect $lookup Pipeline'}</span>
+          </button>
         </div>
 
+        {/* Collapsible Pipeline Drawer */}
         {showCode && (
-          <div className="mb-6 bg-gray-950 text-blue-400 p-5 rounded-2xl shadow-inner text-xs font-mono overflow-x-auto border border-gray-800">
-            <div className="text-gray-400 mb-2 font-sans font-bold uppercase text-[10px] tracking-wider">
-              Single Pipeline with $lookup Definition:
+          <div className="mb-6 rounded-xl bg-zinc-950 border border-zinc-800 p-5 shadow-xl text-zinc-100 font-mono text-xs overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3">
+              <div className="flex items-center gap-2 text-zinc-400 font-sans text-xs font-semibold">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                MongoDB $lookup Relational Join &bull; db.users &rarr; db.posts
+              </div>
+              <span className="text-[11px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                Foreign Field Index: userId_1_createdAt_-1
+              </span>
             </div>
-            <pre>{pipelineCode}</pre>
+            <pre className="text-blue-400/90 leading-relaxed overflow-x-auto text-xs">{pipelineCode}</pre>
           </div>
         )}
 
         {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-xs sm:text-sm text-blue-900 flex items-start space-x-3">
-          <svg className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <span className="font-bold">Evaluation Constraint Compliant:</span> Starts on the <code>Users</code> collection, performs a left-outer join on the <code>Posts</code> collection via <code>$lookup</code>, and uses <strong>no <code>populate()</code></strong> or separate queries.
-          </div>
-        </div>
-
         {loading ? (
-          <LoadingSpinner text="Executing $lookup aggregation join..." />
+          <LoadingSpinner text="Executing join pipeline..." />
         ) : !data ? (
-          <div className="bg-white p-8 rounded-2xl border border-gray-200 text-center text-gray-500">
-            User record not found.
+          <div className="bg-white p-12 rounded-2xl border border-zinc-200 text-center text-zinc-500 shadow-2xs">
+            User record not found in database.
           </div>
         ) : (
           <div className="space-y-6">
             {/* User Profile Card */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="bg-white rounded-2xl border border-zinc-200/80 p-6 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <div className="flex items-center space-x-3 mb-1">
-                  <h2 className="text-xl font-bold text-gray-900">{data.name}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-gray-100 text-gray-700">
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{data.name}</h1>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
                     {data.role}
                   </span>
                 </div>
-                <div className="text-sm text-gray-500 font-mono">{data.email}</div>
+                <div className="text-xs font-mono text-zinc-400 mb-3">{data.email}</div>
+
                 {data.interests && data.interests.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {data.interests.map((interest, idx) => (
-                      <span key={idx} className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-mono font-medium">
-                        #{interest}
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-50 text-zinc-700 border border-zinc-200/60 font-mono"
+                      >
+                        <Hash className="w-3 h-3 text-zinc-400" />
+                        {interest}
                       </span>
                     ))}
                   </div>
                 )}
               </div>
 
-              <div className="text-right bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                <div className="text-xs text-blue-600 font-bold uppercase tracking-wider">Joined Posts</div>
-                <div className="text-3xl font-black text-blue-700">{data.posts?.length || 0}</div>
+              <div className="sm:text-right bg-zinc-50 px-5 py-3.5 rounded-xl border border-zinc-100">
+                <div className="text-[11px] font-medium uppercase tracking-wider text-zinc-400 mb-0.5">
+                  Authored Posts
+                </div>
+                <div className="text-3xl font-black text-zinc-900 tracking-tight font-mono">
+                  {data.posts?.length || 0}
+                </div>
               </div>
             </div>
 
-            {/* Joined Posts Section */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                  Posts Joined from Posts Collection via $lookup
-                </h3>
+            {/* Posts Feed Section */}
+            <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-2xs overflow-hidden">
+              <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-zinc-400" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+                    Posts Joined from Posts Collection
+                  </h2>
+                </div>
+                <span className="text-[11px] font-mono text-zinc-400">
+                  {data.posts?.length || 0} items
+                </span>
               </div>
 
               {!data.posts || data.posts.length === 0 ? (
-                <div className="p-8 text-center text-gray-500 text-sm">
-                  This user has not authored any public posts yet.
+                <div className="p-12 text-center text-zinc-400 text-sm">
+                  This user has not published any public posts.
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-zinc-100">
                   {data.posts.map((post) => (
-                    <div key={post._id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <h4 className="text-base font-bold text-gray-900 mb-1">{post.title}</h4>
-                      <p className="text-sm text-gray-700 whitespace-pre-line mb-3">{post.content}</p>
-                      <div className="text-[11px] text-gray-400 font-mono">
-                        Post ID: {post._id} • Created: {new Date(post.createdAt).toLocaleString()}
+                    <article key={post._id} className="p-6 hover:bg-zinc-50/60 transition-colors">
+                      <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-zinc-600 whitespace-pre-line leading-relaxed mb-4">
+                        {post.content}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </span>
+                        <span>&bull;</span>
+                        <span>ID: {post._id}</span>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               )}
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import { Compass, Plus, Calendar, Edit3, Trash2, User, ArrowRight } from 'lucide-react';
 
 const PublicPostsPage = () => {
   const { user, isAuthenticated, isAdmin } = useAuth();
@@ -59,7 +60,7 @@ const PublicPostsPage = () => {
 
     try {
       await api.post('/posts', createForm);
-      setSuccess('Post published successfully to the community feed!');
+      setSuccess('Post published to community feed.');
       setCreateModalOpen(false);
       setCreateForm({ title: '', content: '' });
       fetchPosts(1);
@@ -79,7 +80,7 @@ const PublicPostsPage = () => {
 
     try {
       await api.put(`/posts/${editModal.post._id}`, editForm);
-      setSuccess('Post updated successfully.');
+      setSuccess('Post updated.');
       setEditModal({ open: false, post: null });
       fetchPosts(currentPage);
     } catch (err) {
@@ -97,7 +98,7 @@ const PublicPostsPage = () => {
 
     try {
       await api.delete(`/posts/${deleteModal.post._id}`);
-      setSuccess('Post deleted successfully.');
+      setSuccess('Post deleted.');
       setDeleteModal({ open: false, post: null });
       fetchPosts(currentPage);
     } catch (err) {
@@ -116,73 +117,92 @@ const PublicPostsPage = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Community Posts</h1>
-          <p className="text-sm text-gray-500">
-            Public feed visible to everyone. Posts are stored in a separate Posts collection and indexed for fast retrieval.
-          </p>
+    <div className="min-h-screen bg-zinc-50/50 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <div className="text-[11px] font-mono font-medium text-zinc-400 uppercase mb-1">
+              Public Discussion
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900">
+              Community Posts
+            </h1>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              Public developer discussions, architectural tutorials, and technical insights.
+            </p>
+          </div>
+
+          {isAuthenticated ? (
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors shrink-0"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create Post</span>
+            </button>
+          ) : (
+            <span className="text-xs text-zinc-400 font-mono">Sign in to publish posts</span>
+          )}
         </div>
 
-        {isAuthenticated && (
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-          >
-            + Create Public Post
-          </button>
-        )}
-      </div>
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+        {success && <Alert type="success" message={success} onClose={() => setSuccess('')} />}
 
-      {error && <Alert type="error" message={error} onClose={() => setError('')} />}
-      {success && <Alert type="success" message={success} onClose={() => setSuccess('')} />}
-
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <LoadingSpinner text="Loading public posts..." />
-        ) : posts.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              title="No posts published yet"
-              description="Be the first developer to publish a public post!"
-              actionText={isAuthenticated ? "Create Post" : null}
-              onAction={() => setCreateModalOpen(true)}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-gray-100">
+        <div className="space-y-4">
+          {loading ? (
+            <LoadingSpinner text="Loading feed..." />
+          ) : posts.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-zinc-200/80 p-8 shadow-2xs">
+              <EmptyState
+                title="Feed is quiet"
+                description="Be the first engineer to publish a post to the community feed."
+                actionText={isAuthenticated ? "Create Post" : null}
+                onAction={() => setCreateModalOpen(true)}
+              />
+            </div>
+          ) : (
+            <>
               {posts.map((post) => (
-                <article key={post._id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                    <h2 className="text-lg font-bold text-gray-900">{post.title}</h2>
-                    <div className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded flex items-center space-x-1.5">
-                      <span className="font-semibold text-gray-900">By:</span>
+                <article
+                  key={post._id}
+                  className="bg-white rounded-2xl border border-zinc-200/80 p-6 shadow-2xs hover:shadow-xs transition-all"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                    <h2 className="text-lg font-bold text-zinc-900 tracking-tight">{post.title}</h2>
+                    <div className="inline-flex items-center gap-1.5 text-xs text-zinc-600 bg-zinc-100/80 px-2.5 py-1 rounded-md font-medium">
+                      <User className="w-3 h-3 text-zinc-400" />
                       <span>{post.userId?.name || 'Anonymous'}</span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-700 whitespace-pre-line mb-4">{post.content}</p>
+                  <p className="text-sm text-zinc-600 whitespace-pre-line leading-relaxed mb-4">
+                    {post.content}
+                  </p>
 
-                  <div className="flex justify-between items-center text-xs text-gray-400 border-t border-gray-50 pt-3">
-                    <span>Published: {new Date(post.createdAt).toLocaleDateString()}</span>
+                  <div className="flex justify-between items-center text-xs font-mono text-zinc-400 border-t border-zinc-100 pt-3">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
 
                     {canModify(post) && (
-                      <div className="space-x-2">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
                             setEditModal({ open: true, post });
                             setEditForm({ title: post.title, content: post.content });
                           }}
-                          className="text-blue-600 hover:text-blue-800 font-medium"
+                          className="inline-flex items-center gap-1 text-zinc-500 hover:text-zinc-900 font-sans text-xs font-semibold"
                         >
+                          <Edit3 className="w-3.5 h-3.5" />
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteModal({ open: true, post })}
-                          className="text-red-600 hover:text-red-800 font-medium"
+                          className="inline-flex items-center gap-1 text-rose-500 hover:text-rose-700 font-sans text-xs font-semibold"
                         >
+                          <Trash2 className="w-3.5 h-3.5" />
                           Delete
                         </button>
                       </div>
@@ -190,97 +210,101 @@ const PublicPostsPage = () => {
                   </div>
                 </article>
               ))}
+
+              <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-2xs overflow-hidden mt-6">
+                <Pagination pagination={pagination} onPageChange={(p) => setCurrentPage(p)} />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Create Post Modal */}
+        <Modal
+          isOpen={createModalOpen}
+          title="Create Community Post"
+          confirmText="Publish Post"
+          confirmVariant="primary"
+          loading={createLoading}
+          onClose={() => setCreateModalOpen(false)}
+          onConfirm={handleCreateSubmit}
+        >
+          <form className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-zinc-700 mb-1">Post Title</label>
+              <input
+                type="text"
+                required
+                maxLength={200}
+                value={createForm.title}
+                onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                placeholder="e.g. Architecting High-Performance MongoDB Aggregations"
+                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-700 mb-1">Post Content</label>
+              <textarea
+                required
+                rows={6}
+                value={createForm.content}
+                onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
+                placeholder="Share your thoughts or technical guidelines..."
+                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              />
+            </div>
+          </form>
+        </Modal>
 
-            <Pagination pagination={pagination} onPageChange={(p) => setCurrentPage(p)} />
-          </>
-        )}
-      </div>
+        {/* Edit Post Modal */}
+        <Modal
+          isOpen={editModal.open}
+          title="Edit Community Post"
+          confirmText="Update Post"
+          confirmVariant="primary"
+          loading={editLoading}
+          onClose={() => setEditModal({ open: false, post: null })}
+          onConfirm={handleEditSubmit}
+        >
+          <form className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-zinc-700 mb-1">Post Title</label>
+              <input
+                type="text"
+                required
+                maxLength={200}
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-700 mb-1">Post Content</label>
+              <textarea
+                required
+                rows={6}
+                value={editForm.content}
+                onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              />
+            </div>
+          </form>
+        </Modal>
 
-      {/* Create Post Modal */}
-      <Modal
-        isOpen={createModalOpen}
-        title="Publish Public Post"
-        confirmText="Publish"
-        confirmVariant="primary"
-        loading={createLoading}
-        onClose={() => setCreateModalOpen(false)}
-        onConfirm={handleCreateSubmit}
-      >
-        <form className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
-            <input
-              type="text"
-              required
-              maxLength={200}
-              value={createForm.title}
-              onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
-              placeholder="e.g. Laravel Tutorial"
-              className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Content</label>
-            <textarea
-              required
-              rows={6}
-              value={createForm.content}
-              onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
-              placeholder="Share details, tutorials, or architecture tips..."
-              className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm"
-            />
-          </div>
-        </form>
-      </Modal>
-
-      {/* Edit Post Modal */}
-      <Modal
-        isOpen={editModal.open}
-        title="Edit Post"
-        confirmText="Save Changes"
-        confirmVariant="primary"
-        loading={editLoading}
-        onClose={() => setEditModal({ open: false, post: null })}
-        onConfirm={handleEditSubmit}
-      >
-        <form className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
-            <input
-              type="text"
-              required
-              maxLength={200}
-              value={editForm.title}
-              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-              className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Content</label>
-            <textarea
-              required
-              rows={6}
-              value={editForm.content}
-              onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-              className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm"
-            />
-          </div>
-        </form>
-      </Modal>
-
-      {/* Delete Post Modal */}
-      <Modal
-        isOpen={deleteModal.open}
-        title="Delete Post"
-        confirmText="Delete"
-        confirmVariant="danger"
-        loading={deleteLoading}
-        onClose={() => setDeleteModal({ open: false, post: null })}
-        onConfirm={handleDeleteConfirm}
-      >
-        <p>Are you sure you want to permanently delete post <strong>"{deleteModal.post?.title}"</strong>?</p>
-      </Modal>
+        {/* Delete Post Modal */}
+        <Modal
+          isOpen={deleteModal.open}
+          title="Delete Post"
+          confirmText="Delete Post"
+          confirmVariant="danger"
+          loading={deleteLoading}
+          onClose={() => setDeleteModal({ open: false, post: null })}
+          onConfirm={handleDeleteConfirm}
+        >
+          <p className="text-sm text-zinc-700">
+            Are you sure you want to delete <strong>"{deleteModal.post?.title}"</strong>?
+          </p>
+        </Modal>
+      </main>
     </div>
   );
 };

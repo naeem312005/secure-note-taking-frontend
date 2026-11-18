@@ -65,8 +65,8 @@ function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
-          <footer className="bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
-            CareGuide Secure Note-Taking Application &bull; Technical Interview Assignment &bull; 2026
+          <footer className="bg-white border-t border-zinc-200/80 py-5 text-center text-xs text-zinc-400 font-mono">
+            CareGuide Notes &bull; High-Performance Vault &bull; Node.js &bull; MongoDB &bull; React
           </footer>
         </div>
       </BrowserRouter>
