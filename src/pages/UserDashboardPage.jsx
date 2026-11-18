@@ -6,9 +6,10 @@ import Alert from '../components/Alert';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import { Plus, FileText, Compass, Clock, Edit3, Trash2, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
 
 const UserDashboardPage = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [notes, setNotes] = useState([]);
@@ -52,145 +53,191 @@ const UserDashboardPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Welcome Hero */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center space-x-3 mb-1">
-            <h1 className="text-2xl font-bold text-gray-900">Welcome, {user?.name}!</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-blue-100 text-blue-800">
-              {user?.role}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600">
-            Secure personal dashboard. Manage and organize your private encrypted notes.
-          </p>
-          {user?.interests && user.interests.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mt-3">
-              <span className="text-xs text-gray-500 font-medium">Interests:</span>
-              {user.interests.map((interest, idx) => (
-                <span key={idx} className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded font-mono">
-                  #{interest}
+    <div className="min-h-screen bg-zinc-50/50 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Welcome Banner */}
+        <div className="bg-white rounded-2xl border border-zinc-200/80 p-6 sm:p-8 shadow-2xs mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-mono font-medium text-zinc-400">Personal Workspace</span>
+              <span className="text-zinc-300">&bull;</span>
+              <span className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
+                {user?.role}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900">
+              Welcome back, {user?.name}
+            </h1>
+            <p className="mt-1 text-sm text-zinc-500 max-w-xl">
+              Encrypted note-taking environment protected with role-based access controls and B-tree compound indexing.
+            </p>
+
+            {user?.interests && user.interests.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-zinc-100">
+                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mr-1">
+                  Tags:
                 </span>
+                {user.interests.map((interest, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 bg-zinc-50 border border-zinc-200/60 text-zinc-700 text-xs px-2.5 py-0.5 rounded-md font-mono"
+                  >
+                    <Hash className="w-3 h-3 text-zinc-400" />
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              to="/notes/create"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create Note</span>
+            </Link>
+          </div>
+        </div>
+
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-2xs">
+            <div className="flex items-center justify-between text-zinc-400 mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Total Notes</span>
+              <FileText className="w-4 h-4 text-zinc-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-zinc-900 tracking-tight font-mono">
+              {totalNotes}
+            </div>
+            <div className="mt-2 text-xs text-zinc-400 flex items-center gap-1">
+              <span>Indexed with</span>
+              <code className="text-zinc-600 font-mono text-[11px]">{"{ userId, createdAt }"}</code>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-2xs">
+            <div className="flex items-center justify-between text-zinc-400 mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Access Scope</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            </div>
+            <div className="text-lg font-bold text-zinc-900 tracking-tight flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Isolated Vault</span>
+            </div>
+            <div className="mt-2 text-xs text-zinc-400">
+              Only authenticated owner can decrypt notes
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between text-zinc-400 mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Public Channel</span>
+              <Compass className="w-4 h-4 text-zinc-400" />
+            </div>
+            <Link
+              to="/posts"
+              className="text-sm font-semibold text-zinc-900 hover:text-blue-600 transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Explore Community Feed</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <div className="mt-2 text-xs text-zinc-400">
+              Publish and browse community posts
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Notes Section */}
+        <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-2xs overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-100 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-zinc-400" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700">Recent Notes</h2>
+            </div>
+            <Link
+              to="/notes"
+              className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 inline-flex items-center gap-1 transition-colors"
+            >
+              <span>View All ({totalNotes})</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {loading ? (
+            <LoadingSpinner text="Loading recent notes..." />
+          ) : notes.length === 0 ? (
+            <div className="p-8">
+              <EmptyState
+                title="Your vault is empty"
+                description="Create your first encrypted private note to start organizing your thoughts."
+                actionText="Create Note"
+                actionLink="/notes/create"
+              />
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-100">
+              {notes.map((note) => (
+                <div
+                  key={note._id}
+                  className="p-6 hover:bg-zinc-50/70 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                >
+                  <div className="max-w-3xl">
+                    <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">
+                      {note.title}
+                    </h3>
+                    <p className="text-sm text-zinc-600 line-clamp-2 leading-relaxed">
+                      {note.content}
+                    </p>
+                    <div className="text-xs font-mono text-zinc-400 mt-3 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{new Date(note.createdAt).toLocaleDateString()} at {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      to={`/notes/edit/${note._id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors shadow-2xs"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-zinc-400" />
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => setDeleteModal({ open: true, noteId: note._id, noteTitle: note.title })}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-rose-600 bg-white border border-rose-200/70 rounded-lg hover:bg-rose-50 transition-colors shadow-2xs"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/notes/create"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-          >
-            + Create Note
-          </Link>
-          <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
-            className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {error && <Alert type="error" message={error} onClose={() => setError('')} />}
-
-      {/* Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="text-sm font-medium text-gray-500 mb-1">Total Notes</div>
-          <div className="text-3xl font-extrabold text-blue-600">{totalNotes}</div>
-          <p className="text-xs text-gray-400 mt-2">Stored with compound index optimization</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="text-sm font-medium text-gray-500 mb-1">Security Status</div>
-          <div className="text-lg font-bold text-green-600 flex items-center space-x-1.5">
-            <span>●</span>
-            <span>JWT Authenticated</span>
-          </div>
-          <p className="text-xs text-gray-400 mt-2">Ownership enforced on all operations</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="text-sm font-medium text-gray-500 mb-1">Public Posts</div>
-          <Link to="/posts" className="text-lg font-semibold text-blue-600 hover:underline block">
-            Explore Community Posts &rarr;
-          </Link>
-          <p className="text-xs text-gray-400 mt-2">Read and publish public developer posts</p>
-        </div>
-      </div>
-
-      {/* Recent Notes Section */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-900">Recent Notes</h2>
-          <Link to="/notes" className="text-sm font-medium text-blue-600 hover:underline">
-            View All ({totalNotes}) &rarr;
-          </Link>
-        </div>
-
-        {loading ? (
-          <LoadingSpinner text="Loading recent notes..." />
-        ) : notes.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              title="No notes yet"
-              description="You haven't created any private notes yet. Start writing your first note!"
-              actionText="Create Your First Note"
-              actionLink="/notes/create"
-            />
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {notes.map((note) => (
-              <div key={note._id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="max-w-3xl">
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">{note.title}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">{note.content}</p>
-                  <div className="text-xs text-gray-400 mt-2">
-                    Created: {new Date(note.createdAt).toLocaleDateString()} at {new Date(note.createdAt).toLocaleTimeString()}
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2 shrink-0">
-                  <Link
-                    to={`/notes/edit/${note._id}`}
-                    className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => setDeleteModal({ open: true, noteId: note._id, noteTitle: note.title })}
-                    className="px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={deleteModal.open}
-        title="Confirm Note Deletion"
-        confirmText="Delete Note"
-        confirmVariant="danger"
-        loading={deleting}
-        onClose={() => setDeleteModal({ open: false, noteId: null, noteTitle: '' })}
-        onConfirm={handleDeleteConfirm}
-      >
-        <p>
-          Are you sure you want to permanently delete the note: <strong>"{deleteModal.noteTitle}"</strong>?
-        </p>
-        <p className="mt-2 text-xs text-gray-500">This action cannot be undone.</p>
-      </Modal>
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={deleteModal.open}
+          title="Delete Note"
+          confirmText="Delete"
+          confirmVariant="danger"
+          loading={deleting}
+          onClose={() => setDeleteModal({ open: false, noteId: null, noteTitle: '' })}
+          onConfirm={handleDeleteConfirm}
+        >
+          <p className="text-sm text-zinc-700">
+            Are you sure you want to permanently delete <strong>"{deleteModal.noteTitle}"</strong>?
+          </p>
+          <p className="mt-2 text-xs text-zinc-400">
+            This action removes the record from the MongoDB collection and cannot be recovered.
+          </p>
+        </Modal>
+      </main>
     </div>
   );
 };

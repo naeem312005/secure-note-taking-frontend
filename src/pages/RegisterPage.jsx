@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Alert from '../components/Alert';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -36,50 +37,47 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-zinc-50/50">
+      <div className="max-w-md w-full bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-zinc-200/80">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">Create an Account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign up for a secure note-taking workspace
+          <div className="w-10 h-10 rounded-xl bg-zinc-900 mx-auto mb-4 flex items-center justify-center text-white shadow-xs">
+            <ShieldCheck className="w-5 h-5 text-emerald-400 stroke-[2.2]" />
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900">Create Vault Account</h1>
+          <p className="mt-1.5 text-xs text-zinc-500">
+            Provision a new encrypted personal notes space
           </p>
         </div>
 
         {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
+            <label className="block text-xs font-medium text-zinc-700 mb-1.5">Full Name</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Naeem"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-3.5 py-2.5 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
+            <label className="block text-xs font-medium text-zinc-700 mb-1.5">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. naeem@example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              placeholder="name@example.com"
+              className="w-full px-3.5 py-2.5 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password (min 6 characters)
-            </label>
+            <label className="block text-xs font-medium text-zinc-700 mb-1.5">Password (min 6 characters)</label>
             <input
               type="password"
               required
@@ -87,38 +85,39 @@ const RegisterPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-3.5 py-2.5 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm font-mono transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Interests <span className="text-xs text-gray-400 font-normal">(comma-separated)</span>
+            <label className="block text-xs font-medium text-zinc-700 mb-1.5">
+              Domain Interests <span className="text-zinc-400 font-normal">(comma-separated)</span>
             </label>
             <input
               type="text"
               value={interestsInput}
               onChange={(e) => setInterestsInput(e.target.value)}
-              placeholder="e.g. coding, reading, chess"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              placeholder="e.g. coding, reading, architecture"
+              className="w-full px-3.5 py-2.5 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm transition-all"
             />
-            <p className="mt-1 text-xs text-gray-500">
-              Used in the MongoDB aggregation pipeline to demonstrate Group by Interests.
+            <p className="mt-1 text-[11px] text-zinc-400">
+              Tags are used in the MongoDB aggregation pipeline clustering.
             </p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50 transition-colors"
+            className="w-full mt-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-zinc-900 hover:bg-zinc-800 focus:outline-none shadow-xs disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
           >
-            {loading ? 'Creating Account...' : 'Register'}
+            <span>{loading ? 'Creating Vault...' : 'Create Account'}</span>
+            {!loading && <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+        <div className="mt-6 text-center text-xs text-zinc-500">
+          Already registered?{' '}
+          <Link to="/login" className="font-semibold text-zinc-900 hover:underline">
             Sign in
           </Link>
         </div>

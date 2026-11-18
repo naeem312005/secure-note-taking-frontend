@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import EmptyState from '../components/EmptyState';
 import AdminSubNav from '../components/AdminSubNav';
+import { FileText, Calendar, Clock, User, Hash } from 'lucide-react';
 
 const AllNotesPage = () => {
   const [notes, setNotes] = useState([]);
@@ -33,48 +34,64 @@ const AllNotesPage = () => {
   }, [currentPage]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-zinc-50/50">
       <AdminSubNav />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">All System Notes</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            System-wide note inspector. Query execution is optimized by index <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono font-bold">{"{ createdAt: -1 }"}</code>
-          </p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="text-[11px] font-mono font-medium text-zinc-400 uppercase mb-1">
+              Audit & Inspection
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900">
+              System-Wide Notes
+            </h1>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              Global inventory of notes across all accounts, supported by the reverse-chronological index <code className="font-mono text-xs text-zinc-700 bg-zinc-100 px-1 py-0.5 rounded">{"{ createdAt: -1 }"}</code>.
+            </p>
+          </div>
+          <span className="text-xs font-mono text-zinc-400 bg-white border border-zinc-200 px-3 py-1.5 rounded-lg shadow-2xs">
+            Admin View
+          </span>
         </div>
 
         {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-2xs overflow-hidden">
           {loading ? (
-            <LoadingSpinner text="Fetching all system notes..." />
+            <LoadingSpinner text="Retrieving notes index..." />
           ) : notes.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                title="No notes in database"
-                description="No notes have been created by any user in the system."
+                title="No notes in vault"
+                description="No users have authored any notes yet."
               />
             </div>
           ) : (
             <>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-zinc-100">
                 {notes.map((note) => (
-                  <div key={note._id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div key={note._id} className="p-6 hover:bg-zinc-50/60 transition-colors">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                      <h2 className="text-base font-bold text-gray-900">{note.title}</h2>
-                      <div className="text-xs bg-purple-50 text-purple-800 px-3 py-1 rounded-lg flex items-center space-x-1.5 font-medium">
-                        <span className="font-bold">Author:</span>
-                        <span>{note.userId?.name || 'Unknown'}</span>
-                        <span className="text-purple-400">({note.userId?.email || 'N/A'})</span>
+                      <h2 className="text-base font-bold text-zinc-900 tracking-tight">{note.title}</h2>
+                      <div className="text-xs bg-zinc-100 text-zinc-700 px-2.5 py-1 rounded-md flex items-center gap-1.5 font-medium">
+                        <User className="w-3 h-3 text-zinc-400" />
+                        <span className="font-semibold text-zinc-900">{note.userId?.name || 'Unknown'}</span>
+                        <span className="text-zinc-400 font-mono text-[11px]">({note.userId?.email || 'N/A'})</span>
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-600 whitespace-pre-line line-clamp-3 mb-3">{note.content}</p>
+                    <p className="text-sm text-zinc-600 whitespace-pre-line line-clamp-3 mb-3 leading-relaxed">
+                      {note.content}
+                    </p>
 
-                    <div className="text-[11px] text-gray-400 flex items-center space-x-4 font-mono">
-                      <span>Note ID: {note._id}</span>
-                      <span>Created: {new Date(note.createdAt).toLocaleString()}</span>
+                    <div className="text-xs font-mono text-zinc-400 flex items-center gap-4">
+                      <span>ID: {note._id}</span>
+                      <span>&bull;</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {new Date(note.createdAt).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -84,7 +101,7 @@ const AllNotesPage = () => {
             </>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
